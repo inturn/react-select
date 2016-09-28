@@ -79,6 +79,7 @@ const Select = React.createClass({
 		multi: React.PropTypes.bool,                // multi-value input
 		name: React.PropTypes.string,               // generates a hidden <input /> tag with this field name for html forms
 		noResultsText: stringOrNode,                // placeholder displayed when there are no matching search results
+		onValueAdd: React.PropTypes.func,						// fires when item is added in multi
 		onBlur: React.PropTypes.func,               // onBlur handler: function (event) {}
 		onBlurResetsInput: React.PropTypes.bool,    // whether input is cleared on blur
 		onChange: React.PropTypes.func,             // onChange handler: function (newValue) {}
@@ -89,6 +90,7 @@ const Select = React.createClass({
 		onInputKeyDown: React.PropTypes.func,       // input keyDown handler: function (event) {}
 		onMenuScrollToBottom: React.PropTypes.func, // fires when the menu is scrolled to the bottom; can be used to paginate options
 		onOpen: React.PropTypes.func,               // fires when the menu is opened
+		onValueRemove: React.PropTypes.func,				// fires when item is removed in multi
 		onValueClick: React.PropTypes.func,         // onClick handler for value labels: function (value, event) {}
 		openAfterFocus: React.PropTypes.bool,       // boolean to enable opening dropdown when focused
 		openOnFocus: React.PropTypes.bool,          // always open options menu on focus
@@ -610,6 +612,8 @@ const Select = React.createClass({
 	addValue (value) {
 		var valueArray = this.getValueArray(this.props.value);
 		this.setValue(valueArray.concat(value));
+
+		if (this.props.onValueAdd) this.props.onValueAdd(value);
 	},
 
 	popValue () {
@@ -623,6 +627,8 @@ const Select = React.createClass({
 		var valueArray = this.getValueArray(this.props.value);
 		this.setValue(valueArray.filter(i => i !== value));
 		this.focus();
+
+		if (this.props.onValueRemove) this.props.onValueRemove(value);
 	},
 
 	clearValue (event) {

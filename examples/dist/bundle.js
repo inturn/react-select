@@ -168,6 +168,8 @@ var Async = (function (_Component) {
 	}, {
 		key: 'render',
 		value: function render() {
+			var _this3 = this;
+
 			var _props3 = this.props;
 			var children = _props3.children;
 			var loadingPlaceholder = _props3.loadingPlaceholder;
@@ -180,7 +182,10 @@ var Async = (function (_Component) {
 			var props = {
 				noResultsText: isLoading ? loadingPlaceholder : searchPromptText,
 				placeholder: isLoading ? loadingPlaceholder : placeholder,
-				options: isLoading ? [] : options
+				options: isLoading ? [] : options,
+				ref: function ref(_ref) {
+					return _this3.select = _ref;
+				}
 			};
 
 			return children(_extends({}, this.props, props, {
@@ -428,7 +433,9 @@ var Creatable = _react2['default'].createClass({
 	},
 
 	onInputKeyDown: function onInputKeyDown(event) {
-		var shouldKeyDownEventCreateNewOption = this.props.shouldKeyDownEventCreateNewOption;
+		var _props3 = this.props;
+		var shouldKeyDownEventCreateNewOption = _props3.shouldKeyDownEventCreateNewOption;
+		var onInputKeyDown = _props3.onInputKeyDown;
 
 		var focusedOption = this.select.getFocusedOption();
 
@@ -437,6 +444,8 @@ var Creatable = _react2['default'].createClass({
 
 			// Prevent decorated Select from doing anything additional with this keyDown event
 			event.preventDefault();
+		} else if (onInputKeyDown) {
+			onInputKeyDown(event);
 		}
 	},
 
@@ -451,13 +460,13 @@ var Creatable = _react2['default'].createClass({
 	render: function render() {
 		var _this = this;
 
-		var _props3 = this.props;
-		var _props3$children = _props3.children;
-		var children = _props3$children === undefined ? defaultChildren : _props3$children;
-		var newOptionCreator = _props3.newOptionCreator;
-		var shouldKeyDownEventCreateNewOption = _props3.shouldKeyDownEventCreateNewOption;
+		var _props4 = this.props;
+		var _props4$children = _props4.children;
+		var children = _props4$children === undefined ? defaultChildren : _props4$children;
+		var newOptionCreator = _props4.newOptionCreator;
+		var shouldKeyDownEventCreateNewOption = _props4.shouldKeyDownEventCreateNewOption;
 
-		var restProps = _objectWithoutProperties(_props3, ['children', 'newOptionCreator', 'shouldKeyDownEventCreateNewOption']);
+		var restProps = _objectWithoutProperties(_props4, ['children', 'newOptionCreator', 'shouldKeyDownEventCreateNewOption']);
 
 		var props = _extends({}, restProps, {
 			allowCreate: true,
@@ -1025,6 +1034,7 @@ var Select = _react2['default'].createClass({
 		multi: _react2['default'].PropTypes.bool, // multi-value input
 		name: _react2['default'].PropTypes.string, // generates a hidden <input /> tag with this field name for html forms
 		noResultsText: stringOrNode, // placeholder displayed when there are no matching search results
+		onValueAdd: _react2['default'].PropTypes.func, // fires when item is added in multi
 		onBlur: _react2['default'].PropTypes.func, // onBlur handler: function (event) {}
 		onBlurResetsInput: _react2['default'].PropTypes.bool, // whether input is cleared on blur
 		onChange: _react2['default'].PropTypes.func, // onChange handler: function (newValue) {}
@@ -1035,6 +1045,7 @@ var Select = _react2['default'].createClass({
 		onInputKeyDown: _react2['default'].PropTypes.func, // input keyDown handler: function (event) {}
 		onMenuScrollToBottom: _react2['default'].PropTypes.func, // fires when the menu is scrolled to the bottom; can be used to paginate options
 		onOpen: _react2['default'].PropTypes.func, // fires when the menu is opened
+		onValueRemove: _react2['default'].PropTypes.func, // fires when item is removed in multi
 		onValueClick: _react2['default'].PropTypes.func, // onClick handler for value labels: function (value, event) {}
 		openAfterFocus: _react2['default'].PropTypes.bool, // boolean to enable opening dropdown when focused
 		openOnFocus: _react2['default'].PropTypes.bool, // always open options menu on focus
@@ -1582,6 +1593,8 @@ var Select = _react2['default'].createClass({
 	addValue: function addValue(value) {
 		var valueArray = this.getValueArray(this.props.value);
 		this.setValue(valueArray.concat(value));
+
+		if (this.props.onValueAdd) this.props.onValueAdd(value);
 	},
 
 	popValue: function popValue() {
@@ -1597,6 +1610,8 @@ var Select = _react2['default'].createClass({
 			return i !== value;
 		}));
 		this.focus();
+
+		if (this.props.onValueRemove) this.props.onValueRemove(value);
 	},
 
 	clearValue: function clearValue(event) {
