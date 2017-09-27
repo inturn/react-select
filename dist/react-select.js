@@ -120,7 +120,6 @@ function clearRenderer() {
 	});
 }
 
-var babelHelpers = {};
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -350,28 +349,6 @@ var possibleConstructorReturn = function (self, call) {
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-babelHelpers;
 
 var Option = function (_React$Component) {
 	inherits(Option, _React$Component);
@@ -669,7 +646,10 @@ var Select$1 = function (_React$Component) {
 	}, {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
-			if (this.props.autofocus) {
+			if (typeof this.props.autofocus !== 'undefined' && typeof console !== 'undefined') {
+				console.warn('Warning: The autofocus prop will be deprecated in react-select1.0.0 in favor of autoFocus to match React\'s autoFocus prop');
+			}
+			if (this.props.autoFocus || this.props.autofocus) {
 				this.focus();
 			}
 		}
@@ -1202,6 +1182,8 @@ var Select$1 = function (_React$Component) {
 				// focus the option below the selected one
 				this.focusOption(visibleOptions[lastValueIndex + 1]);
 			}
+
+			if (this.props.onValueAdd) this.props.onValueAdd(value);
 		}
 	}, {
 		key: 'popValue',
@@ -1209,7 +1191,10 @@ var Select$1 = function (_React$Component) {
 			var valueArray = this.getValueArray(this.props.value);
 			if (!valueArray.length) return;
 			if (valueArray[valueArray.length - 1].clearableValue === false) return;
+			var removedValue = valueArray[valueArray.length - 1];
 			this.setValue(this.props.multi ? valueArray.slice(0, valueArray.length - 1) : null);
+
+			if (this.props.multi && this.props.onValueRemove) this.props.onValueRemove(removedValue);
 		}
 	}, {
 		key: 'removeValue',
@@ -1219,6 +1204,8 @@ var Select$1 = function (_React$Component) {
 				return i !== value;
 			}));
 			this.focus();
+
+			if (this.props.onValueRemove) this.props.onValueRemove(value);
 		}
 	}, {
 		key: 'clearValue',
@@ -1489,7 +1476,7 @@ var Select$1 = function (_React$Component) {
 			}
 			return React__default.createElement(
 				'div',
-				{ className: className },
+				{ className: className, key: 'input-wrap' },
 				React__default.createElement('input', inputProps)
 			);
 		}
@@ -1755,7 +1742,8 @@ Select$1.propTypes = {
 	addLabelText: PropTypes.string, // placeholder displayed when you want to add a label on a multi-value input
 	arrowRenderer: PropTypes.func, // Create drop-down caret element
 	autoBlur: PropTypes.bool, // automatically blur the component when an option is selected
-	autofocus: PropTypes.bool, // autofocus the component on mount
+	autofocus: PropTypes.bool, // deprecated; use autoFocus instead
+	autoFocus: PropTypes.bool, // autofocus the component on mount
 	autosize: PropTypes.bool, // whether to enable autosizing or not
 	backspaceRemoves: PropTypes.bool, // whether backspace removes an item if there is no text input
 	backspaceToRemoveMessage: PropTypes.string, // Message to use for screenreaders to press backspace to remove the current item - {label} is replaced with the item label
@@ -1800,6 +1788,8 @@ Select$1.propTypes = {
 	onOpen: PropTypes.func, // fires when the menu is opened
 	onSelectResetsInput: PropTypes.bool, // whether input is cleared on select (works only for multiselect)
 	onValueClick: PropTypes.func, // onClick handler for value labels: function (value, event) {}
+	onValueAdd: PropTypes.func,
+	onValueRemove: PropTypes.func,
 	openOnClick: PropTypes.bool, // boolean to control opening the menu when the control is clicked
 	openOnFocus: PropTypes.bool, // always open options menu on focus
 	optionClassName: PropTypes.string, // additional class(es) to apply to the <Option /> elements
@@ -1956,6 +1946,8 @@ var Async = function (_Component) {
 			var cache = this._cache;
 
 			if (cache && Object.prototype.hasOwnProperty.call(cache, inputValue)) {
+				this._callback = null;
+
 				this.setState({
 					options: cache[inputValue]
 				});
@@ -1964,14 +1956,14 @@ var Async = function (_Component) {
 			}
 
 			var callback = function callback(error, data) {
+				var options = data && data.options || [];
+
+				if (cache) {
+					cache[inputValue] = options;
+				}
+
 				if (callback === _this2._callback) {
 					_this2._callback = null;
-
-					var options = data && data.options || [];
-
-					if (cache) {
-						cache[inputValue] = options;
-					}
 
 					_this2.setState({
 						isLoading: false,

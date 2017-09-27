@@ -551,19 +551,26 @@ class Select extends React.Component {
 			// focus the option below the selected one
 			this.focusOption(visibleOptions[lastValueIndex + 1]);
 		}
+
+		if (this.props.onValueAdd) this.props.onValueAdd(value);
 	}
 
 	popValue () {
 		var valueArray = this.getValueArray(this.props.value);
 		if (!valueArray.length) return;
 		if (valueArray[valueArray.length-1].clearableValue === false) return;
+		const removedValue = valueArray[valueArray.length - 1];
 		this.setValue(this.props.multi ? valueArray.slice(0, valueArray.length - 1) : null);
+
+		if (this.props.multi && this.props.onValueRemove) this.props.onValueRemove(removedValue);
 	}
 
 	removeValue (value) {
 		var valueArray = this.getValueArray(this.props.value);
 		this.setValue(valueArray.filter(i => i !== value));
 		this.focus();
+
+		if (this.props.onValueRemove) this.props.onValueRemove(value);
 	}
 
 	clearValue (event) {
@@ -1099,6 +1106,8 @@ Select.propTypes = {
 	onOpen: PropTypes.func,               // fires when the menu is opened
 	onSelectResetsInput: PropTypes.bool,  // whether input is cleared on select (works only for multiselect)
 	onValueClick: PropTypes.func,         // onClick handler for value labels: function (value, event) {}
+	onValueAdd: PropTypes.func,
+	onValueRemove: PropTypes.func,
 	openOnClick: PropTypes.bool,          // boolean to control opening the menu when the control is clicked
 	openOnFocus: PropTypes.bool,          // always open options menu on focus
 	optionClassName: PropTypes.string,    // additional class(es) to apply to the <Option /> elements
