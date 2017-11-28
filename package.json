@@ -1,11 +1,14 @@
 {
-  "name": "react-select",
-  "version": "1.0.0-rc.10",
-  "description": "A Select control built with and for ReactJS",
+  "name": "inturn-react-select",
+  "version": "1.0.0",
+  "description": "A Select control built with and for ReactJS, modified for INTURN",
   "main": "lib/index.js",
   "jsnext:main": "dist/react-select.es.js",
   "module": "dist/react-select.es.js",
   "style": "dist/react-select.min.css",
+  "publishConfig": {
+    "registry": "https://npm.inturn.co"
+  },
   "author": "Jed Watson",
   "license": "MIT",
   "repository": {
